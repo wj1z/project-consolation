@@ -1,6 +1,4 @@
-import { Controller, OnStart } from "@flamework/core";
+import { Controller } from "@flamework/core";
 
 @Controller()
-export class ExampleController implements OnStart {
-    onStart(): void {}
-}
+export class ExampleController {}

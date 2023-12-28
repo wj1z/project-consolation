@@ -1,8 +1,7 @@
 import { Flamework } from "@flamework/core";
 import { store } from "./store";
 
-store.set_shared_number(0);
-store.set_shared_string("Server!");
+store.set_typewriter_text("Welcome to mustyload");
 
 Flamework.addPaths("src/server/services");
 Flamework.addPaths("src/server/components/flamework");

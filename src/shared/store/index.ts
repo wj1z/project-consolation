@@ -1,8 +1,8 @@
 import { CombineStates } from "@rbxts/reflex";
-import { shared_slice } from "./shared_slice";
+import { game_config } from "./game_config";
 
 export type SharedState = CombineStates<typeof shared_slices>;
 
 export const shared_slices = {
-    shared: shared_slice
+    game_config
 }
