@@ -1,23 +1,21 @@
 import { OnStart, Service } from "@flamework/core";
 import { Players } from "@rbxts/services";
 
-@Service({
-    loadOrder: 0
-})
+@Service()
 export class PlayerManagerService implements OnStart {
     onStart(): void {
-        Players.PlayerAdded.Connect(player => this.player_added(player));
+        Players.PlayerAdded.Connect(player => this._player_added(player));
     }
 
-    player_added(player: Player): void {
+    private _player_added(player: Player): void {
         if (player.Character !== undefined) {
-            this.character_added(player.Character);
+            this._character_added(player.Character);
         }
 
-        player.CharacterAdded.Connect(character => this.character_added(character));
+        player.CharacterAdded.Connect(character => this._character_added(character));
     }
 
-    character_added(character: Model): void {
+    private _character_added(character: Model): void {
         character.AddTag("Character");
     }
 }

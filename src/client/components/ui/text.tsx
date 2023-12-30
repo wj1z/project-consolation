@@ -51,6 +51,7 @@ const Text = (props: TextProps) => {
             Change={props.change ?? {}}
             Event={props.event ?? {}}
         >
+            {props.text_scaled && <uitextsizeconstraint MinTextSize={1} MaxTextSize={props.text_size} />}
             {props.corner_radius && <uicorner CornerRadius={props.corner_radius} />}
             {props.children}
         </textlabel>

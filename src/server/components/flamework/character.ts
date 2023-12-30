@@ -16,16 +16,16 @@ interface CharacterInstance extends Model {
 })
 export class Character extends BaseComponent<{}, CharacterInstance> implements OnTick {
     onTick(): void {
-        this.sit_on_chair();
+        if (store.getState(select_game_state) !== GameState.Running) {
+            this.sit_on_chair();
+        }
     }
 
     sit_on_chair(): void {
         const hum = this.instance.Humanoid;
         if (
             hum.GetState() === Enum.HumanoidStateType.None ||
-            hum.GetState() === Enum.HumanoidStateType.Seated ||
-            
-            store.getState(select_game_state) !== GameState.Intermission
+            hum.GetState() === Enum.HumanoidStateType.Seated
         ) {
             return;
         }
