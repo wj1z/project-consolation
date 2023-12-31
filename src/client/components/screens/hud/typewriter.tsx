@@ -4,6 +4,7 @@ import Roact, { useEffect, useMemo } from "@rbxts/roact";
 import Frame from "client/components/ui/frame";
 import Text from "client/components/ui/text";
 import { palette } from "client/config/palette";
+import { play_audio } from "shared/util/audio";
 import { select_typewriter_is_animated, select_typewriter_text } from "shared/store/game_config/game_config_selectors";
 
 const Typewriter = () => {
@@ -20,7 +21,7 @@ const Typewriter = () => {
     const lifetime = useLifetime([text]);
 
     const typewrite = () => {
-        const WRITER_SPEED = text.size() * 0.03
+        const WRITER_SPEED = text.size() * 0.04
 
         set_writer_motion(new Instant(0));
         Promise.delay(0).andThenCall(
@@ -38,7 +39,7 @@ const Typewriter = () => {
                 
             set_fade_motion(
                 new Linear(1, {
-                    velocity: 0.33
+                    velocity: 0.45
                 })
             )
         });
@@ -80,6 +81,10 @@ const Typewriter = () => {
                 text_scaled={true}
                 text_size={16}
                 text_transparency={fade_transparency()}
+
+                change={{
+                    Text: () => is_animated && play_audio("type")
+                }}
             />
         </Frame>
     );
