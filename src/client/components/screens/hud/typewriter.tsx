@@ -3,8 +3,8 @@ import { useSelector } from "@rbxts/react-reflex";
 import Roact, { useEffect, useMemo } from "@rbxts/roact";
 import Frame from "client/components/ui/frame";
 import Text from "client/components/ui/text";
-import { palette } from "client/config/palette";
-import { play_audio } from "shared/util/audio";
+import Palette from "client/config/palette";
+import PlayAudio from "shared/util/audio";
 import { select_typewriter_is_animated, select_typewriter_text } from "shared/store/game_config/game_config_selectors";
 
 const Typewriter = () => {
@@ -59,11 +59,11 @@ const Typewriter = () => {
             anchor_point={new Vector2(0.5, 0)}
             position={new UDim2(0.5, 0, 0, 8)}
             size={new UDim2(0.15, 64, 0.1, 16)}
-            background_color={palette.base}
+            background_color={Palette.base}
             background_transparency={fade_transparency()}
             corner_radius={new UDim(0.05)}
         >
-            <uistroke Color={palette.crust} Transparency={fade_transparency()} />
+            <uistroke Color={Palette.crust} Transparency={fade_transparency()} />
             <Text
                 anchor_point={new Vector2(0.5, 0.5)}
                 position={UDim2.fromScale(0.5, 0.5)}
@@ -77,13 +77,13 @@ const Typewriter = () => {
                     )
                     || text
                 }
-                text_color={palette.text}
+                text_color={Palette.text}
                 text_scaled={true}
                 text_size={16}
                 text_transparency={fade_transparency()}
 
                 change={{
-                    Text: () => is_animated && play_audio("type")
+                    Text: () => is_animated && PlayAudio("type")
                 }}
             />
         </Frame>

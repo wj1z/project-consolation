@@ -16,7 +16,8 @@ interface CharacterInstance extends Model {
 })
 export class Character extends BaseComponent<{}, CharacterInstance> implements OnTick {
     onTick(): void {
-        if (store.getState(select_game_state) !== GameState.Running) {
+        const game_state = store.getState(select_game_state);
+        if (game_state !== GameState.Running) {
             this.sit_on_chair();
         }
     }

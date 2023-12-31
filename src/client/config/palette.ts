@@ -39,8 +39,10 @@ const base = {
     black: Color3.fromRGB(0, 0, 0)
 };
 
-export const palette = {
+const Palette = {
     ...accents,
     ...neutrals,
     ...base
 };
+
+export default Palette;
