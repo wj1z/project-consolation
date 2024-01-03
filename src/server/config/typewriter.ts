@@ -1,23 +1,23 @@
 const GAME_NAME: string = "Consopoop"
 
 const TypewriterConfig = {
-    WaitingForPlayers:
+    waiting_for_players:
         (current: number, needed: number) =>
         `Waiting for players ${current}/${needed}.`,
     
-    Intermission:
+    intermission:
         (time: number) =>
         `Intermission ${time}s.`,
-    Welcome: `Welcome to ${GAME_NAME}.`,
-    Prelude: [
+    welcome: `Welcome to ${GAME_NAME}.`,
+    prelude: [
         "Quote1.",
         "Quote2.",
         "Quote3.",
     ],
 
-    PlayerLeft: "All players left before finishing the game.",
+    players_left: "All players left before finishing the game.",
 
-    Cleanup: "Cleaning up the area."
+    cleanup: "Cleaning up the area."
 };
 
 export const select_random = (list: string[]) => list[

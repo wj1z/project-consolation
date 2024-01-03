@@ -1,7 +1,7 @@
 const ServerConfig = {
-    MIN_PLAYERS: 1,
+    min_players: 1,
 
-    INTERMISSION_TIME: 5
+    intermission_time: 5
 }
 
 export default ServerConfig;

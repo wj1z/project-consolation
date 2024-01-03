@@ -12,8 +12,8 @@ import { GameState } from "shared/store/game_config";
 export class GameloopService implements OnStart {
     private _current_state: () => Promise<any> = () => this._wait_for_players();
 
-    private _is_enough_players = () => Players.GetPlayers().size() >= ServerConfig.MIN_PLAYERS;
-    private _is_not_enough_players = () => Players.GetPlayers().size() - 1 < ServerConfig.MIN_PLAYERS;
+    private _is_enough_players = () => Players.GetPlayers().size() >= ServerConfig.min_players;
+    private _is_not_enough_players = () => Players.GetPlayers().size() - 1 < ServerConfig.min_players;
 
     private _write = (text: string, is_animated?: boolean) => this.typewriter.write(text, is_animated);
     private _set_game_state = (game_state: GameState) => store.set_game_state(game_state);
@@ -22,7 +22,7 @@ export class GameloopService implements OnStart {
         if (this._is_enough_players()) return Promise.resolve();
 
         const write_player_amount = () => this._write(
-            TypewriterConfig.WaitingForPlayers(Players.GetPlayers().size(), ServerConfig.MIN_PLAYERS)
+            TypewriterConfig.waiting_for_players(Players.GetPlayers().size(), ServerConfig.min_players)
         );
         write_player_amount();
 
@@ -71,13 +71,14 @@ export class GameloopService implements OnStart {
 
             new Promise((resolve, _, on_cancel) => {
                 const tick = os.clock();
-                const time_left = () => ServerConfig.INTERMISSION_TIME - (os.clock() - tick);
+                const time_left = () => ServerConfig.intermission_time - (os.clock() - tick);
 
                 while (time_left() >= 0) {
                     if (on_cancel()) return;
 
+                    const time_left_rounded = math.ceil(time_left());
                     this._write(
-                        TypewriterConfig.Intermission(math.ceil(time_left()))
+                        TypewriterConfig.intermission(time_left_rounded)
                     );
 
                     Promise.delay(0).await();
@@ -87,11 +88,11 @@ export class GameloopService implements OnStart {
             })
             .andThenCall(() => {
                 this._set_game_state(GameState.Running);
-                this._write(TypewriterConfig.Welcome, true);
+                this._write(TypewriterConfig.welcome, true);
             })
             .andThenCall(Promise.delay, 2)
             .andThenCall(
-                () => this._write(select_random(TypewriterConfig.Prelude), true)
+                () => this._write(select_random(TypewriterConfig.prelude), true)
             )
             .andThenCall(Promise.delay, 2)
             .andThenReturn(
@@ -119,7 +120,7 @@ export class GameloopService implements OnStart {
     private async _all_players_left(): Promise<any> {
         return Promise.resolve()
         .andThenCall(
-            () => this._write(TypewriterConfig.PlayerLeft, true)
+            () => this._write(TypewriterConfig.players_left, true)
         )
         .andThenCall(Promise.delay, 3)
         .andThenReturn(
@@ -128,13 +129,12 @@ export class GameloopService implements OnStart {
     }
 
     private async _cleanup(): Promise<any> {
-        this._write(TypewriterConfig.Cleanup, true);
+        this._write(TypewriterConfig.cleanup, true);
 
         return Promise.delay(2)
         .andThenCall(
             () => {
                 this._set_game_state(GameState.Intermission);
-                this._write("on_cleanup_test");
 
                 for (const player of Players.GetPlayers()) {
                     Promise.try(() => player.LoadCharacter());
