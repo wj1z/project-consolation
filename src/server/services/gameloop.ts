@@ -4,7 +4,9 @@ import { Players } from "@rbxts/services";
 import ServerConfig from "server/config/server";
 import TypewriterConfig, { select_random } from "server/config/typewriter";
 import { store } from "server/store";
-import { GameState } from "shared/store/game_config";
+import { GameState, Gamemode } from "shared/store/game_config";
+import { Events } from "server/networking";
+import { select_gamemode } from "shared/store/game_config/game_config_selectors";
 
 @Service({
     loadOrder: 0
@@ -17,6 +19,15 @@ export class GameloopService implements OnStart {
 
     private _write = (text: string, is_animated?: boolean) => this.typewriter.write(text, is_animated);
     private _set_game_state = (game_state: GameState) => store.set_game_state(game_state);
+    private _set_gamemode = (gamemode: Gamemode) => {
+        store.set_gamemode(gamemode);
+        Events.gamemode.broadcast(gamemode);
+    }
+
+    private _startup_game = () => {
+        this._set_game_state(GameState.Running);
+        this._set_gamemode(Gamemode.Classic);
+    }
 
     private async _enough_players(): Promise<Player | void> {
         if (this._is_enough_players()) return Promise.resolve();
@@ -87,14 +98,19 @@ export class GameloopService implements OnStart {
                 resolve(undefined);
             })
             .andThenCall(() => {
-                this._set_game_state(GameState.Running);
-                this._write(TypewriterConfig.welcome, true);
+                this._startup_game();
+                this._write(select_random(TypewriterConfig.prelude), true);
             })
-            .andThenCall(Promise.delay, 2)
-            .andThenCall(
-                () => this._write(select_random(TypewriterConfig.prelude), true)
-            )
-            .andThenCall(Promise.delay, 2)
+            .andThenCall(Promise.delay, 3)
+            .andThenCall(() => {
+                const gamemode = store.getState(select_gamemode);
+                this._write(TypewriterConfig.gamemode[gamemode], true);
+
+                Promise.delay(1).andThenCall(
+                    () => Events.cycle_camera.broadcast()
+                );
+            })
+            .andThenCall(Promise.delay, 6)
             .andThenReturn(
                 () => this._start_round()
             )

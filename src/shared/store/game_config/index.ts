@@ -4,6 +4,7 @@ export interface GameConfig {
     readonly game_state: GameState,
 
     readonly typewriter: Typewriter
+    readonly gamemode: Gamemode
 }
 
 export const enum GameState {
@@ -14,13 +15,17 @@ export type Typewriter = {
     readonly text: string,
     readonly is_animated: boolean
 }
+export const enum Gamemode {
+    Classic = "Classic"
+}
 
 const initial_state: GameConfig = {
     game_state: GameState.Intermission,
     typewriter: {
         text: "",
         is_animated: false
-    }
+    },
+    gamemode: Gamemode.Classic
 };
 
 export const game_config = createProducer(initial_state, {
@@ -28,6 +33,7 @@ export const game_config = createProducer(initial_state, {
         ...state,
         game_state
     }),
+
     set_typewriter_text: (state, text: string) => ({
         ...state,
         typewriter: {
@@ -41,5 +47,10 @@ export const game_config = createProducer(initial_state, {
             text: state.typewriter.text,
             is_animated
         }
+    }),
+
+    set_gamemode: (state, gamemode: Gamemode) => ({
+        ...state,
+        gamemode
     })
 });

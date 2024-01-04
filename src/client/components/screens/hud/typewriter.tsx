@@ -58,7 +58,7 @@ const Typewriter = () => {
         <Frame
             anchor_point={new Vector2(0.5, 0)}
             position={new UDim2(0.5, 0, 0, 8)}
-            size={new UDim2(0.15, 64, 0.1, 16)}
+            size={new UDim2(0.15, 64, 0.1, 24)}
             background_color={Palette.base}
             background_transparency={fade_transparency()}
             corner_radius={new UDim(0.05)}

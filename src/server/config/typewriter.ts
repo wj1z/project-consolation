@@ -1,4 +1,4 @@
-const GAME_NAME: string = "Consopoop"
+import { Gamemode } from "shared/store/game_config";
 
 const TypewriterConfig = {
     waiting_for_players:
@@ -8,12 +8,14 @@ const TypewriterConfig = {
     intermission:
         (time: number) =>
         `Intermission ${time}s.`,
-    welcome: `Welcome to ${GAME_NAME}.`,
     prelude: [
         "Quote1.",
         "Quote2.",
         "Quote3.",
     ],
+    gamemode: {
+        [Gamemode.Classic]: "Classic is a mofga gamemode."
+    },
 
     players_left: "All players left before finishing the game.",
 
