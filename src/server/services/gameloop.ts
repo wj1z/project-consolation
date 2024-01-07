@@ -7,6 +7,8 @@ import { store } from "server/store";
 import { GameState, Gamemode } from "shared/store/game_config";
 import { Events } from "server/networking";
 import { select_gamemode } from "shared/store/game_config/game_config_selectors";
+import PlayAudio from "shared/util/audio";
+import CameraShakes, { CameraShakePreset } from "shared/config/camera_shakes";
 
 @Service({
     loadOrder: 0
@@ -19,14 +21,34 @@ export class GameloopService implements OnStart {
 
     private _write = (text: string, is_animated?: boolean) => this.typewriter.write(text, is_animated);
     private _set_game_state = (game_state: GameState) => store.set_game_state(game_state);
-    private _set_gamemode = (gamemode: Gamemode) => {
+    private _shake = (preset: CameraShakePreset) => Events.shake_camera.broadcast(preset);
+
+    private _set_gamemode(gamemode: Gamemode) {
         store.set_gamemode(gamemode);
-        Events.gamemode.broadcast(gamemode);
+        Events.gamemode_reveal.broadcast(gamemode);
     }
 
     private _startup_game = () => {
         this._set_game_state(GameState.Running);
         this._set_gamemode(Gamemode.Classic);
+        this._shake(CameraShakes.startup);
+    }
+
+    private _pre_restart = () => {
+        this._shake(CameraShakes.pre_restart);
+        PlayAudio("glass_break");
+        this._set_game_state(GameState.Intermission);
+
+        for (const player of Players.GetPlayers()) {
+            Promise.try(() => player.LoadCharacter());
+        }
+    }
+
+    private _restart_game = () => {
+        this._shake(CameraShakes.restart);
+        PlayAudio("restart");
+
+        return this._wait_for_players();
     }
 
     private async _enough_players(): Promise<Player | void> {
@@ -82,7 +104,9 @@ export class GameloopService implements OnStart {
 
             new Promise((resolve, _, on_cancel) => {
                 const tick = os.clock();
+
                 const time_left = () => ServerConfig.intermission_time - (os.clock() - tick);
+                let last_time_left = time_left();
 
                 while (time_left() >= 0) {
                     if (on_cancel()) return;
@@ -91,6 +115,11 @@ export class GameloopService implements OnStart {
                     this._write(
                         TypewriterConfig.intermission(time_left_rounded)
                     );
+
+                    if (time_left_rounded < last_time_left) {
+                        last_time_left = time_left();
+                        PlayAudio("time");
+                    }
 
                     Promise.delay(0).await();
                 }
@@ -149,17 +178,11 @@ export class GameloopService implements OnStart {
 
         return Promise.delay(2)
         .andThenCall(
-            () => {
-                this._set_game_state(GameState.Intermission);
-
-                for (const player of Players.GetPlayers()) {
-                    Promise.try(() => player.LoadCharacter());
-                }
-            }
+            () => this._pre_restart()
         )
         .andThenCall(Promise.delay, 2)
         .andThenReturn(
-            () => this._wait_for_players()
+            () => this._restart_game()
         );
     }
 }

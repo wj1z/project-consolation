@@ -12,7 +12,7 @@ const GamemodeLabel = () => {
     const [fade_motion, set_fade_motion] = useMotor(1);
     const fade_transparency = () => fade_motion.map(t => t);
 
-    useEventListener(Events.gamemode, new_gamemode => {
+    useEventListener(Events.gamemode_reveal, new_gamemode => {
         set_gamemode(new_gamemode);
 
         set_fade_motion(new Instant(0));

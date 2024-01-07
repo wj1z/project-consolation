@@ -34,8 +34,8 @@ const Typewriter = () => {
     };
 
     const delay_fade_out = () => {
-        Promise.delay(3).andThenCall(() => {
-            if (lifetime.getValue() < 3) return;
+        Promise.delay(4).andThenCall(() => {
+            if (lifetime.getValue() < 4-0.25) return;
                 
             set_fade_motion(
                 new Linear(1, {

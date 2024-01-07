@@ -1,5 +1,6 @@
 import { Networking } from "@flamework/networking";
 import { BroadcastAction } from "@rbxts/reflex";
+import { CameraShakePreset } from "shared/config/camera_shakes";
 import { Gamemode } from "shared/store/game_config";
 
 interface ClientToServerEvents {
@@ -9,7 +10,10 @@ interface ClientToServerFunctions {}
 
 interface ServerToClientEvents {
     dispatch(actions: BroadcastAction[]): void,
-    gamemode(gamemode: Gamemode): void,
+
+    gamemode_reveal(gamemode: Gamemode): void,
+    
+    shake_camera(camera_shake_preset: CameraShakePreset): void,
     cycle_camera(): void
 }
 interface ServerToClientFunctions {}
