@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import HUD from "client/components/screens/hud";
+import HUD from "client/app/screens/hud";
 import { Players } from "@rbxts/services";
 import { createPortal, createRoot } from "@rbxts/react-roblox";
 import { ReflexProvider } from "@rbxts/react-reflex";

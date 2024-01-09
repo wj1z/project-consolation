@@ -1,6 +1,8 @@
-import { OnStart, Service } from "@flamework/core";
-import { TypewriterService } from "./typewriter";
 import { Players } from "@rbxts/services";
+import { OnStart, Service } from "@flamework/core";
+import TypewriterService from "./typewriter";
+import PlayerManagerService from "./player_manager";
+import GameManagerService from "./game_manager";
 import ServerConfig from "server/config/server";
 import TypewriterConfig, { select_random } from "server/config/typewriter";
 import { store } from "server/store";
@@ -13,31 +15,39 @@ import CameraShakes, { CameraShakePreset } from "shared/config/camera_shakes";
 @Service({
     loadOrder: 0
 })
-export class GameloopService implements OnStart {
+class GameloopService implements OnStart {
     private _current_state: () => Promise<any> = () => this._wait_for_players();
 
-    private _is_enough_players = () => Players.GetPlayers().size() >= ServerConfig.min_players;
-    private _is_not_enough_players = () => Players.GetPlayers().size() - 1 < ServerConfig.min_players;
-
     private _write = (text: string, is_animated?: boolean) => this.typewriter.write(text, is_animated);
-    private _set_game_state = (game_state: GameState) => store.set_game_state(game_state);
     private _shake = (preset: CameraShakePreset) => Events.shake_camera.broadcast(preset);
 
-    private _set_gamemode(gamemode: Gamemode) {
-        store.set_gamemode(gamemode);
-        Events.gamemode_reveal.broadcast(gamemode);
+    constructor (
+        private typewriter: TypewriterService,
+        private player_manager: PlayerManagerService,
+        private game_manager: GameManagerService
+    ) {}
+
+    onStart(): void {
+        while (true) this._game_loop();
+    }
+
+    private _game_loop(): void {
+        const current_state = this._current_state();
+        this._current_state = current_state.expect();
     }
 
     private _startup_game = () => {
-        this._set_game_state(GameState.Running);
-        this._set_gamemode(Gamemode.Classic);
+        this.player_manager.fill_active_players();
+        this.game_manager.set_game_state(GameState.Running);
+        this.game_manager.set_gamemode(Gamemode.Classic);
         this._shake(CameraShakes.startup);
     }
 
     private _pre_restart = () => {
+        this.game_manager.set_game_state(GameState.Intermission);
+        this.player_manager.clear_active_players();
         this._shake(CameraShakes.pre_restart);
         PlayAudio("glass_break");
-        this._set_game_state(GameState.Intermission);
 
         for (const player of Players.GetPlayers()) {
             Promise.try(() => player.LoadCharacter());
@@ -52,7 +62,7 @@ export class GameloopService implements OnStart {
     }
 
     private async _enough_players(): Promise<Player | void> {
-        if (this._is_enough_players()) return Promise.resolve();
+        if (this.player_manager._is_enough_players()) return Promise.resolve();
 
         const write_player_amount = () => this._write(
             TypewriterConfig.waiting_for_players(Players.GetPlayers().size(), ServerConfig.min_players)
@@ -61,34 +71,20 @@ export class GameloopService implements OnStart {
 
         return Promise.fromEvent(Players.PlayerAdded, () => {
             write_player_amount();
-            return this._is_enough_players()
+            return this.player_manager._is_enough_players()
         });
     }
+
     private async _not_enough_players(): Promise<Player | void> {
-        if (!this._is_enough_players()) return Promise.resolve();
+        if (!this.player_manager._is_enough_players()) return Promise.resolve();
 
         return Promise.fromEvent(Players.PlayerRemoving,
-            () => this._is_not_enough_players()
+            () => this.player_manager._is_not_enough_players()
         );
     }
 
-    constructor (
-        private typewriter: TypewriterService
-    ) {}
-
-    onStart(): void {
-        while (true) {
-            this._game_loop();
-        }
-    }
-
-    private _game_loop(): void {
-        const current_state = this._current_state();
-        this._current_state = current_state.expect();
-    }
-
     private async _wait_for_players(): Promise<any> {
-        this._set_game_state(GameState.Intermission);
+        this.game_manager.set_game_state(GameState.Intermission);
 
         return this._enough_players().andThenReturn(
             () => this._intermission()

@@ -1,6 +1,6 @@
 import { Instant, Linear, useLifetime, useMotor } from "@rbxts/pretty-react-hooks";
 import { useSelector } from "@rbxts/react-reflex";
-import Roact, { useEffect, useMemo, useRef, useState } from "@rbxts/roact";
+import Roact, { useEffect, useMemo } from "@rbxts/roact";
 import Frame from "client/components/ui/frame";
 import Text from "client/components/ui/text";
 import Palette from "client/config/palette";

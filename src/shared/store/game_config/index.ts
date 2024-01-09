@@ -2,9 +2,9 @@ import { createProducer } from "@rbxts/reflex";
 
 export interface GameConfig {
     readonly game_state: GameState,
-
     readonly typewriter: Typewriter
-    readonly gamemode: Gamemode
+    readonly gamemode: Gamemode,
+    readonly active_players: Player[]
 }
 
 export const enum GameState {
@@ -25,7 +25,8 @@ const initial_state: GameConfig = {
         text: "",
         is_animated: false
     },
-    gamemode: Gamemode.Classic
+    gamemode: Gamemode.Classic,
+    active_players: []
 };
 
 export const game_config = createProducer(initial_state, {
@@ -52,5 +53,14 @@ export const game_config = createProducer(initial_state, {
     set_gamemode: (state, gamemode: Gamemode) => ({
         ...state,
         gamemode
+    }),
+
+    set_active_players: (state, active_players: Player[]) => ({
+        ...state,
+        active_players
+    }),
+    reset_active_players: (state) => ({
+        ...state,
+        active_players: []
     })
 });

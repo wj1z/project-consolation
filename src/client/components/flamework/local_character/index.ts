@@ -1,6 +1,6 @@
 import { BaseComponent, Component } from "@flamework/components";
 import { CharacterInstance } from "../character";
-import { Players, TweenService, Workspace } from "@rbxts/services";
+import { Players, Workspace } from "@rbxts/services";
 import { OnRender, OnStart } from "@flamework/core";
 import { Events } from "client/networking";
 

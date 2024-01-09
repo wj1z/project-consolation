@@ -1,4 +1,4 @@
-import Roact, { forwardRef } from "@rbxts/roact";
+import Roact from "@rbxts/roact";
 import { FrameProps } from "./frame";
 
 export interface TextProps<T extends Instance = TextLabel> extends FrameProps<T> {
@@ -23,10 +23,9 @@ export interface TextProps<T extends Instance = TextLabel> extends FrameProps<T>
 	max_visible_graphemes?: number | Roact.Binding<number>
 }
 
-const Text = forwardRef((props: TextProps, ref: Roact.Ref<TextLabel>) => {
+const Text = (props: TextProps) => {
     return (
         <textlabel
-            ref={ref}
             Font={Enum.Font.Unknown}
             FontFace={props.font || Font.fromEnum(Enum.Font.SourceSans)}
             Text={props.text}
@@ -61,6 +60,6 @@ const Text = forwardRef((props: TextProps, ref: Roact.Ref<TextLabel>) => {
             {props.children}
         </textlabel>
     );
-});
+};
 
 export default Text;
