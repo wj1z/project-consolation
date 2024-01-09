@@ -130,7 +130,7 @@ export class GameloopService implements OnStart {
                 this._startup_game();
                 this._write(select_random(TypewriterConfig.prelude), true);
             })
-            .andThenCall(Promise.delay, 3)
+            .andThenCall(Promise.delay, 4)
             .andThenCall(() => {
                 const gamemode = store.getState(select_gamemode);
                 this._write(TypewriterConfig.gamemode[gamemode], true);

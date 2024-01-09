@@ -1,9 +1,12 @@
-const accents = {};
+const accents = {
+    hazel: Color3.fromRGB(188,171,174),
+    dark_hazel: Color3.fromRGB(113,105,105)
+};
 
 const neutrals = {
-	text: Color3.fromRGB(255, 255, 255),
-	base: Color3.fromRGB(45, 45, 45),
-	crust: Color3.fromRGB(28, 28, 28)
+	text: Color3.fromRGB(251,251,251),
+	base: Color3.fromRGB(45, 46, 46),
+	crust: Color3.fromRGB(15, 15, 15)
 };
 
 const base = {

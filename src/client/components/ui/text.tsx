@@ -1,4 +1,4 @@
-import Roact from "@rbxts/roact";
+import Roact, { forwardRef } from "@rbxts/roact";
 import { FrameProps } from "./frame";
 
 export interface TextProps<T extends Instance = TextLabel> extends FrameProps<T> {
@@ -7,6 +7,8 @@ export interface TextProps<T extends Instance = TextLabel> extends FrameProps<T>
 	text_color?: Color3 | Roact.Binding<Color3>,
 	text_size?: number | Roact.Binding<number>,
 	text_transparency?: number | Roact.Binding<number>,
+    text_stroke_color?: Color3 | Roact.Binding<Color3>,
+    text_stroke_transparency?: number | Roact.Binding<number>,
 	text_wrapped?: boolean | Roact.Binding<boolean>,
 	text_x_alignment?: Roact.InferEnumNames<Enum.TextXAlignment>,
 	text_y_alignment?: Roact.InferEnumNames<Enum.TextYAlignment>,
@@ -21,15 +23,18 @@ export interface TextProps<T extends Instance = TextLabel> extends FrameProps<T>
 	max_visible_graphemes?: number | Roact.Binding<number>
 }
 
-const Text = (props: TextProps) => {
+const Text = forwardRef((props: TextProps, ref: Roact.Ref<TextLabel>) => {
     return (
         <textlabel
+            ref={ref}
             Font={Enum.Font.Unknown}
             FontFace={props.font || Font.fromEnum(Enum.Font.SourceSans)}
             Text={props.text}
             TextColor3={props.text_color}
             TextSize={props.text_size ?? 18}
             TextTransparency={props.text_transparency}
+            TextStrokeColor3={props.text_stroke_color}
+            TextStrokeTransparency={props.text_stroke_transparency}
             TextWrapped={props.text_wrapped}
             TextXAlignment={props.text_x_alignment}
             TextYAlignment={props.text_y_alignment}
@@ -56,6 +61,6 @@ const Text = (props: TextProps) => {
             {props.children}
         </textlabel>
     );
-}
+});
 
 export default Text;

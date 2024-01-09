@@ -3,23 +3,23 @@ import { Gamemode } from "shared/store/game_config";
 const TypewriterConfig = {
     waiting_for_players:
         (current: number, needed: number) =>
-        `Waiting for players: ${current}/${needed}.`,
+        `Waiting for players: <b>${current} / ${needed}</b>.`,
     
     intermission:
         (time: number) =>
-        `Intermission ${time}s.`,
+        `Intermission: <b>${time}s</b>.`,
     prelude: [
-        "Quote1.",
-        "Quote2.",
-        "Quote3.",
+        `“Risk is the shotgun, and choice is pulling the trigger.”`,
+        `“Eight strangers, one goal.”`,
+        `“In the end, our prayers will become our last words.”`
     ],
     gamemode: {
-        [Gamemode.Classic]: "classic_gamemode_description"
+        [Gamemode.Classic]: "<b>Classic</b>: You either pull the trigger or drop the bullet."
     },
 
     players_left: "All players left before finishing the game.",
 
-    cleanup: "Cleaning up the area."
+    cleanup: "Cleaning up the area..."
 };
 
 export const select_random = (list: string[]) => list[

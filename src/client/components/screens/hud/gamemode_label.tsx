@@ -14,15 +14,14 @@ const GamemodeLabel = () => {
 
     useEventListener(Events.gamemode_reveal, new_gamemode => {
         set_gamemode(new_gamemode);
-
         set_fade_motion(new Instant(0));
+        PlayAudio("gamemode");
+
         Promise.delay(3).andThenCall(
             () => set_fade_motion(new Linear(1, {
                 velocity: 0.75
             }))
         );
-
-        PlayAudio("gamemode");
     });
 
     return (
@@ -33,15 +32,19 @@ const GamemodeLabel = () => {
             z_index={10}
             text_color={Palette.text}
             text_scaled={true}
-            font={Font.fromEnum(Enum.Font.Antique)}
-            text={`Gamemode: ${gamemode ?? "N/A"}`}
+            font={Font.fromEnum(Enum.Font.Merriweather)}
+            text={`Gamemode: <b>${gamemode ?? "N/A"}</b>`}
             text_transparency={fade_transparency()}
-            text_size={64}
+            text_size={56}
+            rich_text={true}
+            text_stroke_transparency={fade_transparency()}
         >
-            <uistroke
-                Color={Palette.crust}
-                Thickness={2}
-                Transparency={fade_transparency()}
+            <uigradient Color={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Palette.white),
+                    new ColorSequenceKeypoint(1, Palette.hazel)
+                ])}
+                Rotation={90}
             />
         </Text>
     );

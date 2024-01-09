@@ -1,11 +1,12 @@
 import { Instant, Linear, useLifetime, useMotor } from "@rbxts/pretty-react-hooks";
 import { useSelector } from "@rbxts/react-reflex";
-import Roact, { useEffect, useMemo } from "@rbxts/roact";
+import Roact, { useEffect, useMemo, useRef, useState } from "@rbxts/roact";
 import Frame from "client/components/ui/frame";
 import Text from "client/components/ui/text";
 import Palette from "client/config/palette";
 import PlayAudio from "shared/util/audio";
 import { select_typewriter_is_animated, select_typewriter_text } from "shared/store/game_config/game_config_selectors";
+import { remove_rich_tags } from "client/util/string";
 
 const Typewriter = () => {
     const text = useSelector(select_typewriter_text);
@@ -14,14 +15,9 @@ const Typewriter = () => {
     , [text]);
 
     const [writer_motion, set_writer_motion] = useMotor(0);
-
-    const [fade_motion, set_fade_motion] = useMotor(0);
-    const fade_transparency = () => fade_motion.map(t => t);
-
-    const lifetime = useLifetime([text]);
-
+    const text_length = utf8.len(remove_rich_tags(text))[0] as number;
     const typewrite = () => {
-        const WRITER_SPEED = text.size() * 0.04
+        const WRITER_SPEED = text_length * 0.0325
 
         set_writer_motion(new Instant(0));
         Promise.delay(0).andThenCall(
@@ -33,10 +29,14 @@ const Typewriter = () => {
         ));
     };
 
+    const [fade_motion, set_fade_motion] = useMotor(0);
+    const fade_transparency = (threshold: number = 0) => fade_motion.map(t => math.clamp(t + threshold, 0, 1));
+    
+    const lifetime = useLifetime([text]);
+    const FADE_OUT_TIME = 5;
     const delay_fade_out = () => {
-        Promise.delay(4).andThenCall(() => {
-            if (lifetime.getValue() < 4-0.25) return;
-                
+        Promise.delay(FADE_OUT_TIME).andThenCall(() => {
+            if (lifetime.getValue() < FADE_OUT_TIME-0.25) return;
             set_fade_motion(
                 new Linear(1, {
                     velocity: 0.45
@@ -47,10 +47,9 @@ const Typewriter = () => {
 
     useEffect(() => {
         set_fade_motion(new Linear(0, { velocity: 2 }));
-        delay_fade_out();
-
         if (is_animated === true) {
             typewrite();
+            delay_fade_out();
         }
     }, [text]);
 
@@ -64,26 +63,31 @@ const Typewriter = () => {
             corner_radius={new UDim(0.05)}
         >
             <uistroke Color={Palette.crust} Transparency={fade_transparency()} />
+            <uigradient Color={
+                new ColorSequence([
+                    new ColorSequenceKeypoint(0, Palette.white),
+                    new ColorSequenceKeypoint(1, Palette.dark_hazel)
+                ])}
+                Rotation={90}
+            />
             <Text
                 anchor_point={new Vector2(0.5, 0.5)}
                 position={UDim2.fromScale(0.5, 0.5)}
                 size={UDim2.fromScale(0.85, 0.85)}
-                text={
-                    is_animated
-                    && writer_motion.map(t => 
-                        string.sub(
-                            text, 1, math.floor(t * text.size())
-                        )
-                    )
-                    || text
-                }
+                text={text}
                 text_color={Palette.text}
                 text_scaled={true}
                 text_size={16}
                 text_transparency={fade_transparency()}
-
+                rich_text={true}
+                text_stroke_transparency={fade_transparency(0.5)}
+                max_visible_graphemes={
+                    is_animated
+                    && writer_motion.map(t => t * text_length)
+                    || text_length
+                }
                 change={{
-                    Text: () => is_animated && PlayAudio("type")
+                    MaxVisibleGraphemes: () => is_animated && PlayAudio("type")
                 }}
             />
         </Frame>

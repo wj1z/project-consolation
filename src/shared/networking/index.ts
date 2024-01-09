@@ -4,17 +4,17 @@ import { CameraShakePreset } from "shared/config/camera_shakes";
 import { Gamemode } from "shared/store/game_config";
 
 interface ClientToServerEvents {
-    start(): void
+    start(): void,
+    look_at(camera_dir: Vector3): void
 }
 interface ClientToServerFunctions {}
 
 interface ServerToClientEvents {
     dispatch(actions: BroadcastAction[]): void,
-
     gamemode_reveal(gamemode: Gamemode): void,
-    
     shake_camera(camera_shake_preset: CameraShakePreset): void,
-    cycle_camera(): void
+    cycle_camera(): void,
+    looked_at(character: Model, camera_dir: Vector3): void
 }
 interface ServerToClientFunctions {}
 

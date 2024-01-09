@@ -1,4 +1,4 @@
-const CameraShakes: {[index: string]: CameraShakePreset} = {
+const CameraShakes: { [id: string]: CameraShakePreset } = {
     startup: {
         magnitude: 0.35,
         roughness: 35,
