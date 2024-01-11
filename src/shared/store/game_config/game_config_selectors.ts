@@ -8,3 +8,5 @@ export const select_typewriter_is_animated = (state: SharedState) => state.game_
 export const select_gamemode = (state: SharedState) => state.game_config.gamemode;
 
 export const select_active_players = (state: SharedState) => state.game_config.active_players;
+
+export const select_time_left = (state: SharedState) => state.game_config.time_left;

@@ -1,6 +1,7 @@
 const accents = {
     hazel: Color3.fromRGB(188,171,174),
-    dark_hazel: Color3.fromRGB(113,105,105)
+    dark_hazel: Color3.fromRGB(113,105,105),
+    red: Color3.fromRGB(199, 76, 70)
 };
 
 const neutrals = {

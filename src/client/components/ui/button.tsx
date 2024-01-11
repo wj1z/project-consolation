@@ -26,9 +26,10 @@ const Button = (props: ButtonProps) => {
         <textbutton
             Active={props.active}
             AutoButtonColor={false}
-            AnchorPoint={props.anchor_point}
-            Position={props.position}
+            AnchorPoint={props.anchor_point ?? new Vector2(0.5, 0.5)}
+            Position={props.position ?? UDim2.fromScale(0.5, 0.5)}
             Size={props.size}
+            SizeConstraint={props.size_constraint}
             Text=""
             BorderSizePixel={0}
             BackgroundColor3={props.background_color}

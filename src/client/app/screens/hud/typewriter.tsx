@@ -4,9 +4,9 @@ import Roact, { useEffect, useMemo } from "@rbxts/roact";
 import Frame from "client/components/ui/frame";
 import Text from "client/components/ui/text";
 import Palette from "client/config/palette";
-import PlayAudio from "shared/util/audio";
 import { select_typewriter_is_animated, select_typewriter_text } from "shared/store/game_config/game_config_selectors";
 import { remove_rich_tags } from "client/util/string";
+import { play_audio } from "shared/util/audio";
 
 const Typewriter = () => {
     const text = useSelector(select_typewriter_text);
@@ -14,19 +14,14 @@ const Typewriter = () => {
         () => useSelector(select_typewriter_is_animated)
     , [text]);
 
-    const [writer_motion, set_writer_motion] = useMotor(0);
+    const [writer_motion, set_writer_motion, writer_api] = useMotor(0);
     const text_length = utf8.len(remove_rich_tags(text))[0] as number;
     const typewrite = () => {
         const WRITER_SPEED = text_length * 0.0325
 
         set_writer_motion(new Instant(0));
-        Promise.delay(0).andThenCall(
-            () => set_writer_motion(
-                new Linear(1, {
-                    velocity: 1 / WRITER_SPEED
-                }
-            )
-        ));
+        writer_api.motor.step(0);
+        set_writer_motion(new Linear(1, { velocity: 1 / WRITER_SPEED }));
     };
 
     const [fade_motion, set_fade_motion] = useMotor(0);
@@ -71,8 +66,6 @@ const Typewriter = () => {
                 Rotation={90}
             />
             <Text
-                anchor_point={new Vector2(0.5, 0.5)}
-                position={UDim2.fromScale(0.5, 0.5)}
                 size={UDim2.fromScale(0.85, 0.85)}
                 text={text}
                 text_color={Palette.text}
@@ -87,7 +80,7 @@ const Typewriter = () => {
                     || text_length
                 }
                 change={{
-                    MaxVisibleGraphemes: () => is_animated && PlayAudio("type")
+                    MaxVisibleGraphemes: () => is_animated && play_audio("type")
                 }}
             />
         </Frame>

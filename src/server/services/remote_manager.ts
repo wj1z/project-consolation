@@ -2,7 +2,7 @@ import { OnStart, Service } from "@flamework/core";
 import { Events } from "server/networking";
 
 @Service()
-class EventManagerService implements OnStart {
+class RemoteManagerService implements OnStart {
     onStart(): void {
         Events.look_at.connect((player, camera_dir) => this._look_at(player, camera_dir));
     }

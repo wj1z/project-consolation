@@ -27,7 +27,7 @@ const Text = (props: TextProps) => {
     return (
         <textlabel
             Font={Enum.Font.Unknown}
-            FontFace={props.font || Font.fromEnum(Enum.Font.SourceSans)}
+            FontFace={props.font ?? Font.fromEnum(Enum.Font.SourceSans)}
             Text={props.text}
             TextColor3={props.text_color}
             TextSize={props.text_size ?? 18}
@@ -43,9 +43,10 @@ const Text = (props: TextProps) => {
             RichText={props.rich_text}
             MaxVisibleGraphemes={props.max_visible_graphemes}
             AutomaticSize={props.text_auto_resize}
-            AnchorPoint={props.anchor_point}
-            Position={props.position}
+            AnchorPoint={props.anchor_point ?? new Vector2(0.5, 0.5)}
+            Position={props.position ?? UDim2.fromScale(0.5, 0.5)}
             Size={props.size}
+            SizeConstraint={props.size_constraint}
             BackgroundColor3={props.background_color}
             BackgroundTransparency={props.background_transparency ?? 1}
             ClipsDescendants={props.clips_descendants}

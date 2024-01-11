@@ -6,11 +6,11 @@ import GameManagerService from "./game_manager";
 import ServerConfig from "server/config/server";
 import TypewriterConfig, { select_random } from "server/config/typewriter";
 import { store } from "server/store";
-import { GameState, Gamemode } from "shared/store/game_config";
+import { GameState } from "shared/store/game_config";
 import { Events } from "server/networking";
-import { select_gamemode } from "shared/store/game_config/game_config_selectors";
-import PlayAudio from "shared/util/audio";
+import { select_game_state, select_gamemode } from "shared/store/game_config/game_config_selectors";
 import CameraShakes, { CameraShakePreset } from "shared/config/camera_shakes";
+import { play_audio } from "shared/util/audio";
 
 @Service({
     loadOrder: 0
@@ -37,54 +37,51 @@ class GameloopService implements OnStart {
     }
 
     private _startup_game = () => {
-        this.player_manager.fill_active_players();
-        this.game_manager.set_game_state(GameState.Running);
-        this.game_manager.set_gamemode(Gamemode.Classic);
+        this.game_manager.startup_game();
+        
         this._shake(CameraShakes.startup);
     }
 
     private _pre_restart = () => {
-        this.game_manager.set_game_state(GameState.Intermission);
-        this.player_manager.clear_active_players();
-        this._shake(CameraShakes.pre_restart);
-        PlayAudio("glass_break");
+        this.game_manager.pre_restart();
 
-        for (const player of Players.GetPlayers()) {
-            Promise.try(() => player.LoadCharacter());
-        }
+        this._shake(CameraShakes.pre_restart);
+        play_audio("glass_break");
     }
 
     private _restart_game = () => {
         this._shake(CameraShakes.restart);
-        PlayAudio("restart");
+        play_audio("restart");
 
         return this._wait_for_players();
     }
 
     private async _enough_players(): Promise<Player | void> {
         if (this.player_manager._is_enough_players()) return Promise.resolve();
+        const game_state = store.getState(select_game_state);
 
         const write_player_amount = () => this._write(
             TypewriterConfig.waiting_for_players(Players.GetPlayers().size(), ServerConfig.min_players)
         );
-        write_player_amount();
+        if (game_state === GameState.WaitingForPlayers) write_player_amount();
 
         return Promise.fromEvent(Players.PlayerAdded, () => {
-            write_player_amount();
-            return this.player_manager._is_enough_players()
+            if (game_state === GameState.WaitingForPlayers) write_player_amount();
+
+            return this.player_manager._is_enough_players();
         });
     }
 
-    private async _not_enough_players(): Promise<Player | void> {
-        if (!this.player_manager._is_enough_players()) return Promise.resolve();
+    private async _not_enough_players(active: boolean = false): Promise<Player | void> {
+        if (!this.player_manager._is_enough_players(active)) return Promise.resolve();
 
         return Promise.fromEvent(Players.PlayerRemoving,
-            () => this.player_manager._is_not_enough_players()
+            () => this.player_manager._is_not_enough_players(active)
         );
     }
 
     private async _wait_for_players(): Promise<any> {
-        this.game_manager.set_game_state(GameState.Intermission);
+        this.game_manager.set_game_state(GameState.WaitingForPlayers);
 
         return this._enough_players().andThenReturn(
             () => this._intermission()
@@ -99,6 +96,8 @@ class GameloopService implements OnStart {
             ),
 
             new Promise((resolve, _, on_cancel) => {
+                this.game_manager.set_game_state(GameState.Intermission);
+
                 const tick = os.clock();
 
                 const time_left = () => ServerConfig.intermission_time - (os.clock() - tick);
@@ -114,7 +113,7 @@ class GameloopService implements OnStart {
 
                     if (time_left_rounded < last_time_left) {
                         last_time_left = time_left();
-                        PlayAudio("time");
+                        play_audio("time");
                     }
 
                     Promise.delay(0).await();
@@ -143,25 +142,56 @@ class GameloopService implements OnStart {
     }
 
     private async _start_round(): Promise<any> {
-        this._write("Started.", true);
+        const gamemode = store.getState(select_gamemode);
+
+        const [real_bullets, fake_bullets] = this.game_manager.select_bullets();
 
         return Promise.race([
-            this._not_enough_players()
+            this._not_enough_players(true)
             .andThenReturn(
                 () => this._all_players_left()
             ),
 
-            Promise.delay(5)
+            this.game_manager.start_timer()
+            .andThenReturn(
+                () => this._timeout()
+            ),
+
+            new Promise(
+                (resolve) => {
+                    resolve(this._write(TypewriterConfig.start[gamemode](real_bullets, fake_bullets), true));
+                }
+            )
+            .andThenCall(Promise.delay, 30)
             .andThenReturn(
                 () => this._cleanup()
             )
         ]);
     }
 
+    private async _winner_left(winner: Player): Promise<any> {
+        return new Promise(
+            (resolve) => resolve(this._write(TypewriterConfig.winner(winner.DisplayName), true))
+        )
+        .andThenCall(Promise.delay, 3)
+        .andThenReturn(
+            () => this._cleanup()
+        );
+    }
+
     private async _all_players_left(): Promise<any> {
-        return Promise.resolve()
-        .andThenCall(
-            () => this._write(TypewriterConfig.players_left, true)
+        return new Promise(
+            (resolve) => resolve(this._write(TypewriterConfig.no_players_left, true))
+        )
+        .andThenCall(Promise.delay, 3)
+        .andThenReturn(
+            () => this._cleanup()
+        );
+    }
+
+    private async _timeout(): Promise<any> {
+        return new Promise(
+            (resolve) => resolve(this._write(TypewriterConfig.timeout, true))
         )
         .andThenCall(Promise.delay, 3)
         .andThenReturn(

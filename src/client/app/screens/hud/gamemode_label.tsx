@@ -4,7 +4,7 @@ import Text from "client/components/ui/text";
 import Palette from "client/config/palette";
 import { Events } from "client/networking";
 import { Gamemode } from "shared/store/game_config";
-import PlayAudio from "shared/util/audio";
+import { play_audio } from "shared/util/audio";
 
 const GamemodeLabel = () => {
     const [gamemode, set_gamemode] = useState<Gamemode>();
@@ -15,7 +15,7 @@ const GamemodeLabel = () => {
     useEventListener(Events.gamemode_reveal, new_gamemode => {
         set_gamemode(new_gamemode);
         set_fade_motion(new Instant(0));
-        PlayAudio("gamemode");
+        play_audio("gamemode");
 
         Promise.delay(3).andThenCall(
             () => set_fade_motion(new Linear(1, {
@@ -26,8 +26,6 @@ const GamemodeLabel = () => {
 
     return (
         <Text
-            anchor_point={new Vector2(0.5, 0.5)}
-            position={UDim2.fromScale(0.5, 0.5)}
             size={new UDim2(0.25, 200, 0.15, 0)}
             z_index={10}
             text_color={Palette.text}

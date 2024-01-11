@@ -4,12 +4,15 @@ export interface GameConfig {
     readonly game_state: GameState,
     readonly typewriter: Typewriter
     readonly gamemode: Gamemode,
-    readonly active_players: Player[]
+    readonly active_players: Player[],
+    readonly time_left: number
 }
 
 export const enum GameState {
+    WaitingForPlayers,
     Intermission,
-    Running
+    Running,
+    CleaningUp
 }
 export type Typewriter = {
     readonly text: string,
@@ -26,7 +29,8 @@ const initial_state: GameConfig = {
         is_animated: false
     },
     gamemode: Gamemode.Classic,
-    active_players: []
+    active_players: [],
+    time_left: 0
 };
 
 export const game_config = createProducer(initial_state, {
@@ -62,5 +66,10 @@ export const game_config = createProducer(initial_state, {
     reset_active_players: (state) => ({
         ...state,
         active_players: []
+    }),
+
+    set_time_left: (state, time_left: number) => ({
+        ...state,
+        time_left
     })
 });

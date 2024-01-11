@@ -17,7 +17,14 @@ const TypewriterConfig = {
         [Gamemode.Classic]: "<b>Classic</b>: You either pull the trigger or drop the bullet."
     },
 
-    players_left: "All players left before finishing the game.",
+    start: {
+        [Gamemode.Classic]: (real: number, fake: number) =>
+        `There ${real > 1 ? "are" : "is"} <b>${real} real ${real > 1 ? "bullets" : "bullet"}</b> and <b>${fake} fake ${fake > 1 ? "bullets" : "bullet"}</b>.`
+    },
+
+    winner: (winner_name: string) => `The winner is <b>${winner_name}</b>.`,
+    no_players_left: "All players left before finishing the game.",
+    timeout: "Time is out.",
 
     cleanup: "Cleaning up the area..."
 };
